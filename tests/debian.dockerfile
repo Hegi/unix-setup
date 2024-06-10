@@ -6,4 +6,8 @@ RUN useradd -s /bin/bash -m -U -u 1000 -p '$6$G3v.CB7SjMSP2IMP$giMSeGOun/txXObSk
 
 USER hegi
 
-RUN cd /unix-setup && clear && sudo ./install.sh
+WORKDIR /unix-setup
+
+RUN sudo ./install.sh
+
+ENTRYPOINT ["/usr/bin/zsh"]

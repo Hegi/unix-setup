@@ -1,13 +1,5 @@
 #!/bin/bash
 
-if [[ -n "${ZSH_VERSION:-""}" ]]; then
-  setopt pipefail
-elif [[ -n "${BASH_VERSION}" ]]; then
-  set -o pipefail
-fi
-
-set -eux
-
 . ./src/install_lib.sh
 
 main() {
@@ -22,7 +14,7 @@ main() {
     fi
 
     install_as_root "$@"
-    sudo -E -u "${SUDO_USER}" -H zsh -c ". ./src/install_lib.sh; install_as_user" "$@"
+    sudo -E -u "${SUDO_USER}" -H /bin/bash -c ". ./src/install_lib.sh; install_as_user" "$@"
 }
 
 main "$@"

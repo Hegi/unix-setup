@@ -1,5 +1,14 @@
 #!/bin/bash
 
+if [[ -n "${ZSH_VERSION:-""}" ]]; then
+  setopt pipefail
+elif [[ -n "${BASH_VERSION}" ]]; then
+  set -o pipefail
+fi
+
+set -eux
+
+
 is_app_installed() {
     local app_name
     app_name="${1}"
@@ -260,7 +269,7 @@ install_as_root() {
     arch="$(dpkg --print-architecture)"
 
     mkdir -p -m 755 /etc/apt/keyrings
-    apt install -y curl gnupg ca-certificates unzip tar
+    apt install -y curl gnupg ca-certificates unzip tar procps
 
     apps_to_install+=("zsh" "zip")
 
@@ -321,14 +330,12 @@ install_as_root() {
         echo "No need to install GUI applications and packages"
     fi
 
-    echo "Apps to Install: ${apps_to_install[@]}"
-
     apt update && apt upgrade -y
     apt install -y --no-install-recommends "${apps_to_install[@]}"
-
-    install_powershell
+    # zsh zip httpie gum terraform gh eza
+    install_powershell # ?
     install_starship
-    install_zoxide
+    install_zoxide # ?
     install_jq
     install_yq
     install_fzf
@@ -349,11 +356,18 @@ install_as_user() {
     # 	&& terraform -install-autocomplete
 
     # Note: make nodejs installation optional. Opt in/out?
-    if type nvm  > /dev/null 2>&1; then
-        curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh" | zsh && . ~/.zshrc
-        # Note: shall we also update bashrc in a 'smart' way?
-        nvm install latest
-        npm install -g npm@latest
+    if ! type nvm  > /dev/null 2>&1; then
+        curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh" | bash
+
+        export NVM_DIR="$HOME/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+        local latest_node_version_number
+        set +euxo pipefail
+        latest_node_version_number="$(nvm ls-remote | tail -1 | sed 's/^[[:space:]]*v//' | awk '{$1=$1; print}')"
+        echo "latest_node_version_number: ${latest_node_version_number}"
+        nvm install "${latest_node_version_number}" --latest-npm
+        set -euxo pipefail
         npm config set fund false --location=global
     	# npm install -g @nestjs/cli jest vercel prettier
     fi
