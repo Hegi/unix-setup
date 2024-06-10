@@ -334,10 +334,9 @@ install_as_root() {
 
     apt update && apt upgrade -y
     apt install -y --no-install-recommends "${apps_to_install[@]}"
-    # zsh zip httpie gum terraform gh eza
+    # Temporarily turning off powershell due to: https://github.com/PowerShell/PowerShell/issues/23197
     # install_powershell
     install_starship
-    install_zoxide # ?
     install_jq
     install_yq
     install_fzf
@@ -348,6 +347,9 @@ install_as_root() {
 }
 
 install_as_user() {
+
+    install_zoxide
+
     # Note for configuration management:
     # 	&& echo 'if [ -f ~/.bash_local ]; then' >>/home/vscode/.bashrc \
     #   && echo '  . ~/.bash_local' >>/home/vscode/.bashrc \
