@@ -8,6 +8,6 @@ USER hegi
 
 WORKDIR /unix-setup
 
-RUN sudo ./install.sh
+# RUN sudo ./install.sh
 
-ENTRYPOINT ["/usr/bin/zsh"]
+ENTRYPOINT ["/bin/bash"]

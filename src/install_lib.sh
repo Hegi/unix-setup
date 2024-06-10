@@ -81,12 +81,12 @@ is_not_wsl() {
 
 is_gui_present() {
     # Check for the DISPLAY environment variable
-    if [[ -n "$DISPLAY" ]]; then
+    if [[ -n "${DISPLAY:-""}" ]]; then
         return 0
     fi
 
     # Check for the XDG_SESSION_TYPE environment variable (common in modern desktops)
-    if [[ "$XDG_SESSION_TYPE" == "x11" || "$XDG_SESSION_TYPE" == "wayland" ]]; then
+    if [[ "${XDG_SESSION_TYPE:-""}" == "x11" || "${XDG_SESSION_TYPE:-""}" == "wayland" ]]; then
         return 0
     fi
 
