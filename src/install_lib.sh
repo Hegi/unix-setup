@@ -106,7 +106,7 @@ prepare_apt_key() {
     apt_source_path="$3"
     use_gpg="${4:-false}"
     arch=""
-    if [[ -n "${5}" ]]; then
+    if [[ -n "${5:-""}" ]]; then
         arch="arch=${5}"
     fi
 
@@ -129,11 +129,11 @@ prepare_apt_key() {
         return 1
     fi
 
-    echo -e "deb [${arch} signed-by=${key_path}]\n${apt_source_path}" > "/etc/apt/sources.list.d/${app_name}.list"
+    echo -e "deb [${arch} signed-by=${key_path}] ${apt_source_path}" > "/etc/apt/sources.list.d/${app_name}.list"
 }
 
 prepare_ms_key() {
-    if [[ type powershell > /dev/null ]]; then
+    if type powershell > /dev/null 2>&1; then
         return
     fi
 
@@ -145,7 +145,7 @@ prepare_ms_key() {
 }
 
 install_starship() {
-    if [[ type starship -eq 0 ]]; then
+    if type starship  > /dev/null 2>&1; then
         return
     fi
 
@@ -156,7 +156,7 @@ install_starship() {
 }
 
 install_zoxide() {
-    if [[ type zoxide -eq 0 ]]; then
+    if type zoxide  > /dev/null 2>&1; then
         return
     fi
     curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
@@ -177,6 +177,11 @@ install_jq() {
 install_bat() {
     # Naming is bad here, never version will break, needs to be more dynamic.
     get_deb_from_github "sharkdp/bat" "bat-musl_0.24.0_amd64.deb"
+}
+
+install_powershell() {
+    # Naming is bad here, never version will break, needs to be more dynamic.
+    get_deb_from_github "PowerShell/PowerShell" "powershell_7.4.2-1.deb_amd64.deb"
 }
 
 install_fzf() {
@@ -257,7 +262,7 @@ install_as_root() {
     mkdir -p -m 755 /etc/apt/keyrings
     apt install -y curl gnupg ca-certificates unzip tar
 
-    apps_to_install+=("zsh zip")
+    apps_to_install+=("zsh" "zip")
 
     prepare_apt_key "httpie" "https://packages.httpie.io/deb/KEY.gpg" "https://packages.httpie.io/deb ./" true "${arch}"
     apps_to_install+=("httpie")
@@ -266,11 +271,11 @@ install_as_root() {
     apps_to_install+=("gum")
 
     prepare_apt_key "hashicorp" "https://apt.releases.hashicorp.com/gpg" \
-      "https://apt.releases.hashicorp.com $(lsb_release -cs) main" true
+      "https://apt.releases.hashicorp.com $(. /etc/os-release && echo "$VERSION_CODENAME") main" true
     apps_to_install+=("terraform")
 
     prepare_ms_key
-    apps_to_install+=("powershell")
+    apps_to_install+=("libicu72")
 
     prepare_apt_key "githubcli-archive-keyring" "https://cli.github.com/packages/githubcli-archive-keyring.gpg" \
       "https://cli.github.com/packages stable main" false "${arch}"
@@ -316,9 +321,12 @@ install_as_root() {
         echo "No need to install GUI applications and packages"
     fi
 
-    apt update && apt upgrade -y
-    apt install -y --no-install-recommends "$apps_to_install[@]"
+    echo "Apps to Install: ${apps_to_install[@]}"
 
+    apt update && apt upgrade -y
+    apt install -y --no-install-recommends "${apps_to_install[@]}"
+
+    install_powershell
     install_starship
     install_zoxide
     install_jq
@@ -341,7 +349,7 @@ install_as_user() {
     # 	&& terraform -install-autocomplete
 
     # Note: make nodejs installation optional. Opt in/out?
-    if [[ ! type nvm > /dev/null ]]; then
+    if type nvm  > /dev/null 2>&1; then
         curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh" | zsh && . ~/.zshrc
         # Note: shall we also update bashrc in a 'smart' way?
         nvm install latest
