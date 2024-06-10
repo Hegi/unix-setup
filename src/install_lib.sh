@@ -284,7 +284,9 @@ install_as_root() {
     apps_to_install+=("terraform")
 
     prepare_ms_key
-    apps_to_install+=("libicu72")
+    # Temporarily turning off powershell due to: https://github.com/PowerShell/PowerShell/issues/23197
+    #apps_to_install+=("libicu74")
+    #apps_to_install+=("libicu72")
 
     prepare_apt_key "githubcli-archive-keyring" "https://cli.github.com/packages/githubcli-archive-keyring.gpg" \
       "https://cli.github.com/packages stable main" false "${arch}"
@@ -333,7 +335,7 @@ install_as_root() {
     apt update && apt upgrade -y
     apt install -y --no-install-recommends "${apps_to_install[@]}"
     # zsh zip httpie gum terraform gh eza
-    install_powershell # ?
+    # install_powershell
     install_starship
     install_zoxide # ?
     install_jq
