@@ -109,6 +109,7 @@ prepare_apt_key() {
     local arch
     local use_gpg
     local apt_source_path
+    local file_extension
 
     app_name="$1"
     key_url="$2"
@@ -118,12 +119,13 @@ prepare_apt_key() {
     if [[ -n "${5:-""}" ]]; then
         arch="arch=${5}"
     fi
+    file_extension="${6:-"gpg"}"
 
     if [[ -f "/etc/apt/sources.list.d/${app_name}.list" ]]; then
         return
     fi
 
-    key_path="/etc/apt/keyrings/${app_name}.gpg"
+    key_path="/etc/apt/keyrings/${app_name}.${file_extension}"
 
     if [[ "$use_gpg" = true ]]; then
         curl -fsSL "$key_url" | gpg --dearmor -o "$key_path"
@@ -265,6 +267,7 @@ install_fonts() {
 # sudo optional: lazygit, lazydocker, redis-tools mariadb-client build-essential
 install_as_root() {
     local -a apps_to_install=()
+    local -a apps_to_remove=()
     local arch
     arch="$(dpkg --print-architecture)"
 
@@ -300,8 +303,10 @@ install_as_root() {
     if is_not_wsl; then
         prepare_apt_key "docker" "https://download.docker.com/linux/debian/gpg" \
           "https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
-          false "${arch}"
-        apps_to_install+=("docker-ce-cli")
+          false "${arch}" "asc"
+        apps_to_remove+=("docker.io" "docker-doc" "docker-compose" "podman-docker" "containerd" "runc")
+        apps_to_install+=("docker-ce" "docker-ce-cli" "containerd.io" "docker-buildx-plugin" "docker-compose-plugin")
+
     fi
 
     if is_not_wsl && is_gui_present; then
@@ -333,6 +338,7 @@ install_as_root() {
     fi
 
     apt update && apt upgrade -y
+    apt remove -y "${apps_to_remove[@]}"
     apt install -y --no-install-recommends "${apps_to_install[@]}"
     # Temporarily turning off powershell due to: https://github.com/PowerShell/PowerShell/issues/23197
     # install_powershell
