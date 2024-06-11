@@ -274,7 +274,7 @@ install_as_root() {
     mkdir -p -m 755 /etc/apt/keyrings
     apt install -y curl gnupg ca-certificates unzip tar procps
 
-    apps_to_install+=("zsh" "zip")
+    apps_to_install+=("zsh" "zip" "stow")
 
     prepare_apt_key "httpie" "https://packages.httpie.io/deb/KEY.gpg" "https://packages.httpie.io/deb ./" true "${arch}"
     apps_to_install+=("httpie")
@@ -348,6 +348,19 @@ install_as_root() {
     install_fzf
     install_aws_cli
     install_bat
+
+    cd utils
+    docker build -t git-builder -f ./utils/git.dockerfile .
+    docker run --rm -v $(pwd):/output git-builder
+    docker image rm git-builder
+    dpkg -i git.deb
+    rm git.deb
+
+    docker build -t stow-builder -f ./utils/stow.dockerfile .
+    docker run --rm -v $(pwd):/output stow-builder
+    docker image rm stow-builder
+    sudo dpkg -i stow.deb
+    rm stow.deb
 
     chsh -s /bin/zsh "${SUDO_USER}" # if user is not root, this command requires authentication
 }

@@ -78,5 +78,6 @@ WORKDIR /home/builder
 # Set entrypoint to bash for manual inspection (optional)
 ENTRYPOINT ["/bin/cp", "./git.deb", "/output"]
 
+# docker build -t git-builder .
 # docker run --rm -v $(pwd):/output git-builder
 # sudo dpkg -i git.deb
