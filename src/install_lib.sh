@@ -45,7 +45,7 @@ get_binary_from_github() {
     download_from_github "${1}" "${2}" "${app_name}"
 
     chmod +x ./"${app_name}"
-    mv ./"${app_name}" /usr/bin/
+    mv ./"${app_name}" /usr/local/bin/
 }
 
 get_targz_from_github() {
@@ -55,7 +55,7 @@ get_targz_from_github() {
     tar -xzvf "${app_name}.tar.gz"
 
     chmod +x ./"${app_name}"
-    mv ./"${app_name}" /usr/bin/
+    mv ./"${app_name}" /usr/local/bin/
 
     rm "${app_name}.tar.gz"
 }
@@ -260,6 +260,30 @@ install_fonts() {
     fc-cache -fv
 }
 
+install_zellij() {
+    get_targz_from_github "zellij-org/zellij" "zellij-x86_64-unknown-linux-musl.tar.gz"
+}
+
+build_and_install_git() {
+    cd utils
+    docker build -t git-builder -f ./utils/git.dockerfile .
+    docker run --rm -v $(pwd):/output git-builder
+    docker image rm git-builder
+    dpkg -i git.deb
+    rm git.deb
+    cd ..
+}
+
+build_and_install_stow() {
+    cd utils
+    docker build -t stow-builder -f ./utils/stow.dockerfile .
+    docker run --rm -v $(pwd):/output stow-builder
+    docker image rm stow-builder
+    sudo dpkg -i stow.deb
+    rm stow.deb
+    cd ..
+}
+
 # Missing:
 # https://github.com/basecamp/omakub/blob/master/install/app-zellij.sh
 # https://github.com/basecamp/omakub/blob/master/install/app-neovim.sh - ??
@@ -348,19 +372,9 @@ install_as_root() {
     install_fzf
     install_aws_cli
     install_bat
-
-    cd utils
-    docker build -t git-builder -f ./utils/git.dockerfile .
-    docker run --rm -v $(pwd):/output git-builder
-    docker image rm git-builder
-    dpkg -i git.deb
-    rm git.deb
-
-    docker build -t stow-builder -f ./utils/stow.dockerfile .
-    docker run --rm -v $(pwd):/output stow-builder
-    docker image rm stow-builder
-    sudo dpkg -i stow.deb
-    rm stow.deb
+    install_zellij
+    build_and_install_git
+    build_and_install_stow
 
     chsh -s /bin/zsh "${SUDO_USER}" # if user is not root, this command requires authentication
 }
