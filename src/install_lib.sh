@@ -1,13 +1,12 @@
 #!/bin/bash
 
 if [[ -n "${ZSH_VERSION:-""}" ]]; then
-  setopt pipefail
+    setopt pipefail
 elif [[ -n "${BASH_VERSION}" ]]; then
-  set -o pipefail
+    set -o pipefail
 fi
 
 set -eux
-
 
 is_app_installed() {
     local app_name
@@ -25,54 +24,47 @@ get_latest_github_version() {
     echo "${latest}"
 }
 
-download_from_github() {
+get_artifact_from_github() {
     local repo
     local binary_name
     local app_name
     repo="${1}"
     binary_name="${2}"
-    app_name="${3}"
-
-    local latest
-    latest=$(get_latest_github_version "${repo}")
-
-    curl -fsSLo "${app_name}" "https://github.com/${repo}/releases/download/${latest}/${binary_name}"
-}
-
-get_binary_from_github() {
-    local app_name
     app_name="${3:-${1##*/}}"
-    download_from_github "${1}" "${2}" "${app_name}"
+
+    curl -fsSLo "${binary_name}" "https://github.com/${repo}/releases/latest/download/${binary_name}"
+
+    if [[ "${binary_name}" == *.tar.gz ]]; then
+        tar -xzvf "${binary_name}"
+    elif [[ "${binary_name}" == *.tar.xz ]]; then
+        tar -xJvf "${binary_name}"
+    elif [[ "${binary_name}" == *.zip ]]; then
+        unzip "${binary_name}"
+    elif [[ "${binary_name}" == *.deb ]]; then
+        dpkg -i ./"${binary_name}"
+        rm "${binary_name}"
+        return
+    else
+        cp ./"${binary_name}" ./"${app_name}"
+    fi
+
+    local file_name
+    file_name="$(find -type f -name ${app_name})"
+    if [[ "$(realpath "$(dirname $file_name)")" != "$(pwd)" ]]; then
+        mv "${file_name}" "$(pwd)"
+        rm -rf "$(realpath "$(dirname $file_name)")"
+    fi
 
     chmod +x ./"${app_name}"
     mv ./"${app_name}" /usr/local/bin/
-}
 
-get_targz_from_github() {
-    local app_name
-    app_name="${3:-${1##*/}}"
-    download_from_github "${1}" "${2}" "${app_name}.tar.gz"
-    tar -xzvf "${app_name}.tar.gz"
-
-    chmod +x ./"${app_name}"
-    mv ./"${app_name}" /usr/local/bin/
-
-    rm "${app_name}.tar.gz"
-}
-
-get_deb_from_github() {
-    local app_name
-    app_name="${3:-${1##*/}}"
-    download_from_github "${1}" "${2}" "${app_name}"
-
-    sudo dpkg -i ./"${app_name}"
-    rm ./"${app_name}"
+    rm "${binary_name}"
 }
 
 is_not_wsl() {
-    if grep -qEi "(Microsoft|WSL)" /proc/version &> /dev/null; then
+    if grep -qEi "(Microsoft|WSL)" /proc/version &>/dev/null; then
         return 1
-    elif grep -qEi "microsoft" /proc/sys/kernel/osrelease &> /dev/null; then
+    elif grep -qEi "microsoft" /proc/sys/kernel/osrelease &>/dev/null; then
         return 1
     else
         return 0
@@ -91,11 +83,11 @@ is_gui_present() {
     fi
 
     # Check for processes associated with common desktop environments
-    if pgrep -x "gnome-session" &> /dev/null || \
-       pgrep -x "startkde" &> /dev/null || \
-       pgrep -x "plasmashell" &> /dev/null || \
-       pgrep -x "xfce4-session" &> /dev/null || \
-       pgrep -x "lxsession" &> /dev/null; then
+    if pgrep -x "gnome-session" &>/dev/null ||
+        pgrep -x "startkde" &>/dev/null ||
+        pgrep -x "plasmashell" &>/dev/null ||
+        pgrep -x "xfce4-session" &>/dev/null ||
+        pgrep -x "lxsession" &>/dev/null; then
         return 0
     fi
 
@@ -140,23 +132,23 @@ prepare_apt_key() {
         return 1
     fi
 
-    echo -e "deb [${arch} signed-by=${key_path}] ${apt_source_path}" > "/etc/apt/sources.list.d/${app_name}.list"
+    echo -e "deb [${arch} signed-by=${key_path}] ${apt_source_path}" >"/etc/apt/sources.list.d/${app_name}.list"
 }
 
 prepare_ms_key() {
-    if type powershell > /dev/null 2>&1; then
+    if type powershell >/dev/null 2>&1; then
         return
     fi
 
     curl -fsSLo packages-microsoft-prod.deb \
-      "https://packages.microsoft.com/config/$(. /etc/os-release && echo "$ID")/$(. /etc/os-release && echo "$VERSION_ID")/packages-microsoft-prod.deb"
+        "https://packages.microsoft.com/config/$(. /etc/os-release && echo "$ID")/$(. /etc/os-release && echo "$VERSION_ID")/packages-microsoft-prod.deb"
 
     dpkg -i packages-microsoft-prod.deb
     rm packages-microsoft-prod.deb
 }
 
 install_starship() {
-    if type starship  > /dev/null 2>&1; then
+    if type starship >/dev/null 2>&1; then
         return
     fi
 
@@ -167,7 +159,7 @@ install_starship() {
 }
 
 install_zoxide() {
-    if type zoxide  > /dev/null 2>&1; then
+    if type zoxide >/dev/null 2>&1; then
         return
     fi
     curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
@@ -178,26 +170,26 @@ install_zoxide() {
 }
 
 install_yq() {
-    get_binary_from_github "mikefarah/yq" "yq_linux_amd64"
+    get_artifact_from_github "mikefarah/yq" "yq_linux_amd64"
 }
 
 install_jq() {
-    get_binary_from_github "jqlang/jq" "jq-linux-amd64"
+    get_artifact_from_github "jqlang/jq" "jq-linux-amd64"
 }
 
 install_bat() {
     # Naming is bad here, never version will break, needs to be more dynamic.
-    get_deb_from_github "sharkdp/bat" "bat-musl_0.24.0_amd64.deb"
+    get_artifact_from_github "sharkdp/bat" "bat-musl_0.24.0_amd64.deb"
 }
 
 install_powershell() {
     # Naming is bad here, never version will break, needs to be more dynamic.
-    get_deb_from_github "PowerShell/PowerShell" "powershell_7.4.2-1.deb_amd64.deb"
+    get_artifact_from_github "PowerShell/PowerShell" "powershell_7.4.2-1.deb_amd64.deb"
 }
 
 install_fzf() {
     # Naming is bad here, never version will break, needs to be more dynamic.
-    get_targz_from_github "junegunn/fzf" "fzf-0.53.0-linux_amd64.tar.gz"
+    get_artifact_from_github "junegunn/fzf" "fzf-0.53.0-linux_amd64.tar.gz"
 }
 
 install_aws_cli() {
@@ -261,33 +253,32 @@ install_fonts() {
 }
 
 install_zellij() {
-    get_targz_from_github "zellij-org/zellij" "zellij-x86_64-unknown-linux-musl.tar.gz"
+    get_artifact_from_github "zellij-org/zellij" "zellij-x86_64-unknown-linux-musl.tar.gz"
+}
+
+install_shellcheck() {
+    get_artifact_from_github "koalaman/shellcheck" "shellcheck-v0.10.0.linux.x86_64.tar.xz"
 }
 
 build_and_install_git() {
-    cd utils
     docker build -t git-builder -f ./utils/git.dockerfile .
     docker run --rm -v $(pwd):/output git-builder
     docker image rm git-builder
     dpkg -i git.deb
     rm git.deb
-    cd ..
 }
 
 build_and_install_stow() {
-    cd utils
     docker build -t stow-builder -f ./utils/stow.dockerfile .
     docker run --rm -v $(pwd):/output stow-builder
     docker image rm stow-builder
     sudo dpkg -i stow.deb
     rm stow.deb
-    cd ..
 }
 
 # Missing:
-# https://github.com/basecamp/omakub/blob/master/install/app-zellij.sh
 # https://github.com/basecamp/omakub/blob/master/install/app-neovim.sh - ??
-# sudo install: shellcheck, flameshot, neovim, btop, ripgrep, gitsign, spotify
+# sudo install: flameshot, neovim, btop, ripgrep, gitsign, spotify
 # sudo optional: lazygit, lazydocker, redis-tools mariadb-client build-essential
 install_as_root() {
     local -a apps_to_install=()
@@ -296,7 +287,7 @@ install_as_root() {
     arch="$(dpkg --print-architecture)"
 
     mkdir -p -m 755 /etc/apt/keyrings
-    apt install -y curl gnupg ca-certificates unzip tar procps
+    apt install -y curl gnupg ca-certificates unzip tar xz-utils procps
 
     apps_to_install+=("zsh" "zip" "stow")
 
@@ -307,7 +298,7 @@ install_as_root() {
     apps_to_install+=("gum")
 
     prepare_apt_key "hashicorp" "https://apt.releases.hashicorp.com/gpg" \
-      "https://apt.releases.hashicorp.com $(. /etc/os-release && echo "$VERSION_CODENAME") main" true
+        "https://apt.releases.hashicorp.com $(. /etc/os-release && echo "$VERSION_CODENAME") main" true
     apps_to_install+=("terraform")
 
     prepare_ms_key
@@ -316,18 +307,18 @@ install_as_root() {
     #apps_to_install+=("libicu72")
 
     prepare_apt_key "githubcli-archive-keyring" "https://cli.github.com/packages/githubcli-archive-keyring.gpg" \
-      "https://cli.github.com/packages stable main" false "${arch}"
+        "https://cli.github.com/packages stable main" false "${arch}"
     apps_to_install+=("gh")
 
     prepare_apt_key "gierens" https://raw.githubusercontent.com/eza-community/eza/main/deb.asc \
-      "http://deb.gierens.de stable main" true "${arch}"
+        "http://deb.gierens.de stable main" true "${arch}"
     apps_to_install+=("eza")
     # Note for configuration management: shall this be aliased as `alias ls='eza'` ?
 
     if is_not_wsl; then
         prepare_apt_key "docker" "https://download.docker.com/linux/debian/gpg" \
-          "https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
-          false "${arch}" "asc"
+            "https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
+            false "${arch}" "asc"
         apps_to_remove+=("docker.io" "docker-doc" "docker-compose" "podman-docker" "containerd" "runc")
         apps_to_install+=("docker-ce" "docker-ce-cli" "containerd.io" "docker-buildx-plugin" "docker-compose-plugin")
 
@@ -335,18 +326,18 @@ install_as_root() {
 
     if is_not_wsl && is_gui_present; then
         prepare_apt_key "brave-browser" \
-        "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg" \
-        "https://brave-browser-apt-release.s3.brave.com/ stable main"
+            "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg" \
+            "https://brave-browser-apt-release.s3.brave.com/ stable main"
         apps_to_install+=("brave-brwoser")
 
         prepare_apt_key "signal-desktop" \
-        "https://updates.signal.org/desktop/apt/keys.asc" "https://updates.signal.org/desktop/apt xenial main" \
-        true "${arch}"
+            "https://updates.signal.org/desktop/apt/keys.asc" "https://updates.signal.org/desktop/apt xenial main" \
+            true "${arch}"
         apps_to_install+=("signal-desktop")
 
         prepare_apt_key "ulauncher" \
-        "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xFAF1020699503176" \
-        "http://ppa.launchpad.net/agornostal/ulauncher/ubuntu jammy main"
+            "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xFAF1020699503176" \
+            "http://ppa.launchpad.net/agornostal/ulauncher/ubuntu jammy main"
         apps_to_install+=("ulauncher")
 
         apps_to_install+=("vlc")
@@ -373,6 +364,7 @@ install_as_root() {
     install_aws_cli
     install_bat
     install_zellij
+    install_shellcheck
     build_and_install_git
     build_and_install_stow
 
@@ -393,12 +385,12 @@ install_as_user() {
     # 	&& terraform -install-autocomplete
 
     # Note: make nodejs installation optional. Opt in/out?
-    if ! type nvm  > /dev/null 2>&1; then
+    if ! type nvm >/dev/null 2>&1; then
         curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh" | bash
 
         export NVM_DIR="$HOME/.nvm"
-        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
         local latest_node_version_number
         set +euxo pipefail
         latest_node_version_number="$(nvm ls-remote | tail -1 | sed 's/^[[:space:]]*v//' | awk '{$1=$1; print}')"
@@ -406,7 +398,7 @@ install_as_user() {
         nvm install "${latest_node_version_number}" --latest-npm
         set -euxo pipefail
         npm config set fund false --location=global
-    	# npm install -g @nestjs/cli jest vercel prettier
+        # npm install -g @nestjs/cli jest vercel prettier
     fi
 
     if is_not_wsl && is_gui_present; then
