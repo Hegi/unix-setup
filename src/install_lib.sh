@@ -153,9 +153,6 @@ install_starship() {
     fi
 
     curl -fsSL https://starship.rs/install.sh | sh -s -- -y
-
-    # Note for configuration management:
-    # add eval to ~/.zshrc
 }
 
 install_zoxide() {
@@ -163,10 +160,6 @@ install_zoxide() {
         return
     fi
     curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
-
-    # Note for configuration management:
-    # add eval "$(zoxide init --cmd cd zsh)" to ~/.zshrc
-    # add/home/$USER/.local/bin to the path
 }
 
 install_yq() {
@@ -200,9 +193,6 @@ install_aws_cli() {
     ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
     cd ..
     rm -rf aws-installer
-
-    # Note for configuration management:
-    # [ -f "/usr/local/bin/aws_completer" ] && complete -C "/usr/local/bin/aws_completer" aws
 }
 
 install_vscode() {
@@ -260,6 +250,10 @@ install_shellcheck() {
     get_artifact_from_github "koalaman/shellcheck" "shellcheck-v0.10.0.linux.x86_64.tar.xz"
 }
 
+install_ripgrep() {
+    get_artifact_from_github "BurntSushi/ripgrep" "ripgrep_14.1.0-1_amd64.deb"
+}
+
 build_and_install_git() {
     docker build -t git-builder -f ./utils/git.dockerfile .
     docker run --rm -v $(pwd):/output git-builder
@@ -313,7 +307,6 @@ install_as_root() {
     prepare_apt_key "gierens" https://raw.githubusercontent.com/eza-community/eza/main/deb.asc \
         "http://deb.gierens.de stable main" true "${arch}"
     apps_to_install+=("eza")
-    # Note for configuration management: shall this be aliased as `alias ls='eza'` ?
 
     if is_not_wsl; then
         prepare_apt_key "docker" "https://download.docker.com/linux/debian/gpg" \
@@ -365,6 +358,7 @@ install_as_root() {
     install_bat
     install_zellij
     install_shellcheck
+    install_ripgrep
     build_and_install_git
     build_and_install_stow
 
@@ -374,15 +368,6 @@ install_as_root() {
 install_as_user() {
 
     install_zoxide
-
-    # Note for configuration management:
-    # 	&& echo 'if [ -f ~/.bash_local ]; then' >>/home/vscode/.bashrc \
-    #   && echo '  . ~/.bash_local' >>/home/vscode/.bashrc \
-    # 	&& echo 'fi' >>/home/vscode/.bashrc \
-    # 	&& sed -i -e 's/HISTSIZE=[0-9]*/HISTISZE=100000/' -e 's/HISTFILESIZE=[0-9]*/HISTFILESIZE=200000/' /home/vscode/.bashrc \
-    # 	&& echo 'eval "$(zoxide init bash)"' >>/home/vscode/.bashrc && echo 'eval "$(starship init bash)"' >>/home/vscode/.bashrc \
-    # 	&& echo 'eval "$(zoxide init zsh)"' >>/home/vscode/.zshrc && echo 'eval "$(starship init zsh)"' >>/home/vscode/.zshrc \
-    # 	&& terraform -install-autocomplete
 
     # Note: make nodejs installation optional. Opt in/out?
     if ! type nvm >/dev/null 2>&1; then
