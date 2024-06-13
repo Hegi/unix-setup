@@ -21,8 +21,12 @@ wsl --install -d Debian --web-download
 After unregister, docker will complain that it's Debian integration is failing. After re-installing the distro, you can
 simply click on the docker restart button and all should be well.
 
+![wsl integration failiure ui](docs/docker-wsl-integration-error.png "WSL Integration failiure")
+
 If your you just installed the Debian distro in WSL for the first time, make sure that you enable the docker WSL
 integration for the distro, before you move on
+
+![wsl integration failiure ui](docs/docker-wsl-integration.png "WSL Integration failiure")
 
 ## Installation
 
