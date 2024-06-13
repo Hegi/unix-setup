@@ -12,10 +12,11 @@ I am making no promisses.
 ## Installation
 
 ```bash
+dotfiles_repo="https://github.com/Hegi/dotfiles-public.git"
 sudo apt update && sudo apt install -y git
 git clone https://github.com/Hegi/unix-setup.git
 cd unix-setup
-sudo ./install.sh
+sudo ./install.sh "${dotfiles_repo}"
 cd ..
 ```
 
@@ -28,6 +29,7 @@ Below is a list of the apps that are directly installed with the script.
 These tools are extensively used by the script itself.
 
 - **`curl`**: The de-facto command-line tool network requests. (HTTP(S), FTP, etc.)
+- **`wget`**: Similar to curl. Only installed so VS Code Server can be installed in wsl.
 - **`gnupg`**: App for encrypting and signing data and communications.
 - **`zip` / `unzip`**: A utility pair for creating / extracting ZIP archives.
 - **`tar`**: A utility for archiving files and extracting archives.

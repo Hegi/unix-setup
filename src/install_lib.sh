@@ -282,7 +282,7 @@ install_as_root() {
     arch="$(dpkg --print-architecture)"
 
     mkdir -p -m 755 /etc/apt/keyrings
-    apt install -y curl gnupg ca-certificates unzip tar xz-utils procps
+    apt install -y curl wget gnupg ca-certificates unzip tar xz-utils procps
 
     apps_to_install+=("zsh" "zip" "stow")
 
@@ -367,7 +367,8 @@ install_as_root() {
 }
 
 install_as_user() {
-
+    local dotfiles_repo
+    dotfiles_repo="${1:-"https://github.com/Hegi/dotfiles-public.git"}"
     install_zoxide
 
     # Note: make nodejs installation optional. Opt in/out?
@@ -390,4 +391,10 @@ install_as_user() {
     if is_not_wsl && is_gui_present; then
         install_fonts
     fi
+
+    cd ~
+    git clone "${dotfiles_repo}" dotfiles
+    cd dotfiles
+    stow .
+
 }
