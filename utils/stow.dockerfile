@@ -1,4 +1,4 @@
-FROM debian:latest
+FROM debian:bullseye
 
 # Set the environment variables
 ENV DEBIAN_FRONTEND=noninteractive

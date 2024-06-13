@@ -9,6 +9,16 @@ help flag build breaking changes in time. Granted if a diviation occures between
 installable OS / WSL those will need to be fixed manually. While I'll try and test the installer every once in a while
 I am making no promisses.
 
+## Installation
+
+```bash
+sudo apt update && sudo apt install -y git
+git clone https://github.com/Hegi/unix-setup.git
+cd unix-setup
+sudo ./install.sh
+cd ..
+```
+
 ## List of installed software, tools and utilities
 
 Below is a list of the apps that are directly installed with the script.

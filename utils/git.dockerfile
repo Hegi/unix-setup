@@ -1,4 +1,4 @@
-FROM debian:latest
+FROM debian:bullseye
 
 # Install necessary dependencies
 RUN apt-get update && apt-get install -y \
@@ -49,7 +49,10 @@ RUN mkdir -p /tmp/git-deb/DEBIAN && \
     echo "Priority: optional" >> /tmp/git-deb/DEBIAN/control && \
     echo "Architecture: amd64" >> /tmp/git-deb/DEBIAN/control && \
     echo "Maintainer: builder <builder@unknown>" >> /tmp/git-deb/DEBIAN/control && \
-    echo "Description: Git version control system" >> /tmp/git-deb/DEBIAN/control
+    echo "Description: Git version control system" >> /tmp/git-deb/DEBIAN/control && \
+    echo "Provides: git" >> /tmp/git-deb/DEBIAN/control && \
+    echo "Replaces: git, git-man" >> /tmp/git-deb/DEBIAN/control && \
+    echo "Conflicts: git, git-man" >> /tmp/git-deb/DEBIAN/control
 
 # Create a tarball of the installed files
 RUN mkdir -p /tmp/git-tarball && \
