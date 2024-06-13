@@ -280,10 +280,16 @@ install_as_root() {
     local -a apps_to_install=()
     local -a apps_to_remove=()
     local arch
+    local distro
     arch="$(dpkg --print-architecture)"
+    distro="$(. /etc/os-release && echo "${ID}")"
 
     mkdir -p -m 755 /etc/apt/keyrings
-    apt install -y curl wget gnupg ca-certificates unzip tar xz-utils procps
+    if [[ "${distro}" == "ubuntu" ]]; then
+        apt install -y zip procps
+    else
+        apt install -y curl wget gnupg ca-certificates unzip tar xz-utils procps
+    fi
 
     apps_to_install+=("zsh" "zip" "stow")
 
@@ -330,9 +336,14 @@ install_as_root() {
             true "${arch}"
         apps_to_install+=("signal-desktop")
 
-        prepare_apt_key "ulauncher" \
-            "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xFAF1020699503176" \
-            "http://ppa.launchpad.net/agornostal/ulauncher/ubuntu jammy main"
+        if [[ "${distro}" == "ubuntu" ]]; then
+            add-apt-repository universe -y
+            add-apt-repository ppa:agornostal/ulauncher -y
+        else
+            prepare_apt_key "ulauncher" \
+                "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xFAF1020699503176" \
+                "http://ppa.launchpad.net/agornostal/ulauncher/ubuntu jammy main"
+        fi
         apps_to_install+=("ulauncher")
 
         apps_to_install+=("vlc")
@@ -347,6 +358,12 @@ install_as_root() {
         echo "No need to install GUI applications and packages"
     fi
 
+    apps_to_install+=("stow") # latest stow build is fragile. Using default one instead.
+
+    if [[ "${distro}" == "ubuntu" ]]; then
+        add-apt-repository ppa:git-core/ppa
+        apt update
+    fi
     apt update && apt upgrade -y
     apt remove -y "${apps_to_remove[@]}"
     apt install -y --no-install-recommends "${apps_to_install[@]}"
@@ -361,8 +378,11 @@ install_as_root() {
     install_zellij
     install_shellcheck
     install_ripgrep
-    build_and_install_git
-    build_and_install_stow
+    if [[ "${distro}" != "ubuntu" ]]; then
+        build_and_install_git
+    fi
+    # build_and_install_stow # latest stow build is fragile. Using default one instead.
+
 
     chsh -s /bin/zsh "${SUDO_USER}" # if user is not root, this command requires authentication
 }
