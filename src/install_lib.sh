@@ -258,7 +258,9 @@ build_and_install_git() {
     docker build -t git-builder -f ./utils/git.dockerfile .
     docker run --rm -v $(pwd):/output git-builder
     docker image rm git-builder
+    apt remove -y git git-man # There is currently a bug with the local git build. This is a workaround line
     dpkg -i git.deb
+    apt install -y gh terraform  # There is currently a bug with the local git build. This is a workaround line
     rm git.deb
 }
 
