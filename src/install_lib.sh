@@ -368,7 +368,10 @@ install_as_root() {
 
 install_as_user() {
     local dotfiles_repo
+    local ZINIT_HOME
+    ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git" # has to be the same as in your .zshrc file
     dotfiles_repo="${1:-"https://github.com/Hegi/dotfiles-public.git"}"
+
     install_zoxide
 
     # Note: make nodejs installation optional. Opt in/out?
@@ -388,13 +391,16 @@ install_as_user() {
         # npm install -g @nestjs/cli jest vercel prettier
     fi
 
-    if is_not_wsl && is_gui_present; then
-        install_fonts
-    fi
-
     cd ~
     git clone "${dotfiles_repo}" dotfiles
     cd dotfiles
     stow .
+
+    if is_not_wsl && is_gui_present; then
+        install_fonts
+    fi
+
+    mkdir -p "$(dirname $ZINIT_HOME)"
+    git clone --depth 1 "https://github.com/zdharma-continuum/zinit.git" "$ZINIT_HOME"
 
 }
