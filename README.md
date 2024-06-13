@@ -9,6 +9,21 @@ help flag build breaking changes in time. Granted if a diviation occures between
 installable OS / WSL those will need to be fixed manually. While I'll try and test the installer every once in a while
 I am making no promisses.
 
+## Fresh installation in WSL
+
+If you want to do a fresh installation on WSL, but you already have Debian distro, here is how you can throw it away:
+
+```powershell
+wsl --unregister Debian
+wsl --install -d Debian --web-download
+```
+
+After unregister, docker will complain that it's Debian integration is failing. After re-installing the distro, you can
+simply click on the docker restart button and all should be well.
+
+If your you just installed the Debian distro in WSL for the first time, make sure that you enable the docker WSL
+integration for the distro, before you move on
+
 ## Installation
 
 ```bash

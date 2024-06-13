@@ -258,7 +258,6 @@ build_and_install_git() {
     docker build -t git-builder -f ./utils/git.dockerfile .
     docker run --rm -v $(pwd):/output git-builder
     docker image rm git-builder
-    apt remove -y git git-man
     dpkg -i git.deb
     rm git.deb
 }
