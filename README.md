@@ -9,6 +9,17 @@ help flag build breaking changes in time. Granted if a diviation occures between
 installable OS / WSL those will need to be fixed manually. While I'll try and test the installer every once in a while
 I am making no promisses.
 
+## What's not covered?
+
+While this setup _should_ be working in native linux, it's not tested. The script is also not modular, it has everything
+I use in a way that testing and script execution is optimized. So no modularity. If you want to remove things, you'll
+have to go through the whole install_lib file. Same goes if you want to add something.
+
+This library also not covers how to install nerdfonts in your favourite terminal, because YMMW. However w/o installing
+at least one - and using it - some of the characters in the console won't show up; making the experience subpar. If you
+don't want to use a nerdfont, that's understandable, however you'll have to tweak quite a lot of configuration for the
+apps used here.
+
 ## Fresh installation in WSL
 
 If you want to do a fresh installation on WSL, but you already have Debian distro, here is how you can throw it away:
@@ -71,6 +82,11 @@ is that you'll need a unix machine to decrypt the content. Given that we are pla
 this shouldn't be a show-stopper; especially with the WSL integrations, I wanted to be explicit with it, before you start
 wanting to use this approch with other repos as well.
 
+Now can you just encrypt the repo, and store it as a private one in a cloud provider? Sure! Do I recommend doing it? Nope!
+And before you mention that I am about to do the exact same thing bellow, let me remind you that this entire repo is
+mostly for demo purposes, and that there is absolutely nothing sensitive in the repo in question. Further more I am also
+sharing the encryption key for said repo, so at this point it's only technically encrypted.
+
 ### Installation using an encrypted dotfiles repo
 
 Make sure you have a gpg key for encryption and that you backed it up into a file. If you don't you can use the
@@ -79,10 +95,34 @@ Make sure you have a gpg key for encryption and that you backed it up into a fil
 command to export it into a file called `dotfiles.asc`. The `0000000000000000000000000000000000000000` stands for the
 id of the key, which you can fetch with the `gpg -k` command.
 
+In case you want to test it with a pre-cooked encryption setup, here is the gpg-key for the encrypted version of the
+same dotfiles-public repo:
+
+```bash
+cat << 'EOF' > dotfiles.asc
+-----BEGIN PGP PRIVATE KEY BLOCK-----
+
+lFgEZmu52xYJKwYBBAHaRw8BAQdAL/9SgHGFQVFiFKWfLJoRmKvYcIika8PbUKQF
+E2Vae/YAAP9FvgfQxydr59atsdKHLLsbuqJtwq05bvN/Bu6E+PZrwBOKsAwAAGdw
+ZwEAAAAAAAC0MElzdHZhbiBIZWdlZHVzIChkb3RmaWxlcykgPGlzdHZhbkBoZWdp
+c3R2YW4uY29tPrAMAABncGcCAAAAAAAAiJkEExYKAEEWIQQCAsiF1zegdJ4KO4As
+vMeoVVPYKQUCZmu52wIbAwUJA8JnAAULCQgHAgIiAgYVCgkICwIEFgIDAQIeBwIX
+gAAKCRAsvMeoVVPYKVltAP4+j3htIDwiNqOnNRkWA3CUjHCbOeSf0Jm8h/JPJXC8
+BgD+Jb99rsH/4/YhThq+GMm6H3rW8170WJiQl5bIOa3DqAWwBgAAZ3BnAJxdBGZr
+udsSCisGAQQBl1UBBQEBB0DmFsCbroR5De5I3KmtKqo9/s5AfaLu+W5TvZbDWebf
+dQMBCAcAAP9vomRbWL6IH+pIdRjzHx1ZcnnnpwuoDrYRL8/m5u++6BEziH4EGBYK
+ACYWIQQCAsiF1zegdJ4KO4AsvMeoVVPYKQUCZmu52wIbDAUJA8JnAAAKCRAsvMeo
+VVPYKa7/AQDVwgZIgmIioVgPX/kzES2hI2/4kZmWoPzz2Q8YA7V3bgEAiVvKoj81
+Hr7M2gqdx0I1e4DBJ97Mw6yiyxyOZYgrKwSwBgAAZ3BnAA==
+=8khS
+-----END PGP PRIVATE KEY BLOCK-----
+EOF
+```
+
 Here's the modified installer script:
 
 ```bash
-dotfiles_repo="gcrypt:user@your-host.com/path/to/dotfiles-encrypted.git"
+dotfiles_repo="gcrypt:git@github.com:Hegi/dotfiles-encrypted-public.git"
 dotfiles_key_path="./dotfiles.asc"
 [[ ! $(type git) ]] && sudo apt update && sudo apt install -y git
 [[ ! $(type git-remote-gcrypt) ]] && sudo apt update && sudo apt install -y git-remote-gcrypt

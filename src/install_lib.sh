@@ -286,9 +286,9 @@ install_as_root() {
 
     mkdir -p -m 755 /etc/apt/keyrings
     if [[ "${distro}" == "ubuntu" ]]; then
-        apt install -y zip procps
+        apt install -y zip procps gnupg2
     else
-        apt install -y curl wget gnupg ca-certificates unzip tar xz-utils procps
+        apt install -y curl wget gnupg2 ca-certificates unzip tar xz-utils procps
     fi
 
     apps_to_install+=("zsh" "zip" "stow")
@@ -389,10 +389,11 @@ install_as_root() {
 
 install_as_user() {
     local dotfiles_repo
+    local dotfiles_key_file
     local ZINIT_HOME
     ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git" # has to be the same as in your .zshrc file
     dotfiles_repo="${1:-"https://github.com/Hegi/dotfiles-public.git"}"
-
+    dotfiles_key_file="${2:-""}"
     install_zoxide
 
     # Note: make nodejs installation optional. Opt in/out?
@@ -412,9 +413,22 @@ install_as_user() {
         # npm install -g @nestjs/cli jest vercel prettier
     fi
 
+    if [[ -n "${dotfiles_key_file}" ]]; then
+        if [[ "${dotfiles_repo}" != "gcrypt:"* ]]; then
+            dotfiles_repo="gcrypt:${dotfiles_repo}"
+        fi
+        gpg --import-options restore --import "${dotfiles_key_file}"
+    fi
+
     cd ~
     git clone "${dotfiles_repo}" dotfiles
     cd dotfiles
+    if [[ -n "${dotfiles_key_file}" ]]; then
+        git config remote.origin.gcrypt-participants "${gpg_key_id}" # "$(git config user.signingkey)"
+        local gpg_key_id
+        gpg_key_id="$(gpg --show-keys "${dotfiles_key_file}" | grep -E '^[[:space:]]+[0-9A-F]{4}' | tr -d ' ')"
+        git config user.signingkey "${gpg_key_id}"
+    fi
     stow .
 
     if is_not_wsl && is_gui_present; then
