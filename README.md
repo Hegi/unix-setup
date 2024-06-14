@@ -32,12 +32,68 @@ integration for the distro, before you move on
 
 ```bash
 dotfiles_repo="https://github.com/Hegi/dotfiles-public.git"
-sudo apt update && sudo apt install -y git
+[[ ! $(type git) ]] && sudo apt update && sudo apt install -y git
 git clone https://github.com/Hegi/unix-setup.git
 cd unix-setup
 sudo ./install.sh "${dotfiles_repo}"
 cd ..
 ```
+
+While the above installation, and dotfile management works, it has one significant drawback: if any of your dotfiles
+contain a secret, it gets into version control. And while it's obvious how unsecure is to make such a repo public,
+keeping it private is only marginally better, if you are hosting the repo with a cloud provider such as GitHub or GitLab.
+Imagine that the provider gets a data-breach and your private dotfiles repo is a victim of said breach. Your secrets are
+just as compromised.
+
+To avoid this scenario, I'd recommend the following measures being taken:
+
+1. **DO NOT** host such a repo with a cloud provider.
+2. Encrypt the repository if you store it remotely.
+
+### Self-hosting
+
+To address the first callout, you can do one of two things: If you have more than one device that needs the dotfiles,
+then you can clone and pull between said devices with git. Just use `git remote add name url` to specify the machines,
+then you can do `git pull basement-server`, `git pull laptop`, `git pull nas` etc. Granted, you won't be able to push
+but you'll have redundancy in place, so if one of the devices needs a re-install, you can get the dotfiles config from
+another.
+
+Or if you have a server running, and have ssh access to said server, then you can setup a bare repo on the server
+somewhere and pull/push that way. `git init --bare repo.git` is the command you are looking for in this case.
+
+### Encryption
+
+The problem with the self-hosted server is the same as with the cloud provider hosted one. Yes, if your own hardware
+gets compromised you have bigger problems. Never the less if you want to add in an extra layer of security, you can
+use `git-remote-gcrypt` to wrap the remote operations and encrypt the data that's being written into the repository.
+The biggest downside of this approach - beyond the ones documented at [git-remote-gcrypt-](https://github.com/spwhitton/git-remote-gcrypt) -
+is that you'll need a unix machine to decrypt the content. Given that we are planning to use this to manage linux configuration
+this shouldn't be a show-stopper; especially with the WSL integrations, I wanted to be explicit with it, before you start
+wanting to use this approch with other repos as well.
+
+### Installation using an encrypted dotfiles repo
+
+Make sure you have a gpg key for encryption and that you backed it up into a file. If you don't you can use the
+`gpg --full-generate-key` command to create one, then the
+`gpg -o dotfiles.asc --armor --export-options backup --export-secret-keys 0000000000000000000000000000000000000000`
+command to export it into a file called `dotfiles.asc`. The `0000000000000000000000000000000000000000` stands for the
+id of the key, which you can fetch with the `gpg -k` command.
+
+Here's the modified installer script:
+
+```bash
+dotfiles_repo="gcrypt:user@your-host.com/path/to/dotfiles-encrypted.git"
+dotfiles_key_path="./dotfiles.asc"
+[[ ! $(type git) ]] && sudo apt update && sudo apt install -y git
+[[ ! $(type git-remote-gcrypt) ]] && sudo apt update && sudo apt install -y git-remote-gcrypt
+git clone https://github.com/Hegi/unix-setup.git
+cd unix-setup
+sudo ./install.sh "${dotfiles_repo}" "${dotfiles_key_path}"
+cd ..
+```
+
+Please note that if you used a passkey for the gpg key, you'll be prompted for it each time you pull or push the
+dotfiles repo. This includes the installation process.
 
 ## List of installed software, tools and utilities
 
