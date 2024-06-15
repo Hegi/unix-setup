@@ -14,7 +14,11 @@ main() {
     fi
 
     install_as_root "$@"
-    sudo -E -u "${SUDO_USER}" -H /bin/bash -c ". ./src/install_lib.sh; install_as_user" "$@"
+    args=()
+    for arg in "$@"; do
+        args+=("\"${arg}\"")
+    done
+    sudo -E -u "${SUDO_USER}" -H /bin/bash -c ". ./src/install_lib.sh; install_as_user ${args[*]}"
 }
 
 main "$@"

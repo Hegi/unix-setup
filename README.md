@@ -99,7 +99,7 @@ In case you want to test it with a pre-cooked encryption setup, here is the gpg-
 same dotfiles-public repo:
 
 ```bash
-cat << 'EOF' > dotfiles.asc
+cat << 'EOF' > gpg-dotfiles.asc
 -----BEGIN PGP PRIVATE KEY BLOCK-----
 
 lFgEZmu52xYJKwYBBAHaRw8BAQdAL/9SgHGFQVFiFKWfLJoRmKvYcIika8PbUKQF
@@ -122,8 +122,8 @@ EOF
 Here's the modified installer script:
 
 ```bash
-dotfiles_repo="gcrypt:git@github.com:Hegi/dotfiles-encrypted-public.git"
-dotfiles_key_path="./dotfiles.asc"
+dotfiles_repo="gcrypt::https://github.com/Hegi/dotfiles-encrypted-public.git"
+dotfiles_key_path="../gpg-dotfiles.asc"
 [[ ! $(type git) ]] && sudo apt update && sudo apt install -y git
 [[ ! $(type git-remote-gcrypt) ]] && sudo apt update && sudo apt install -y git-remote-gcrypt
 git clone https://github.com/Hegi/unix-setup.git

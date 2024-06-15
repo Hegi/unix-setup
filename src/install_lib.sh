@@ -260,7 +260,7 @@ build_and_install_git() {
     docker image rm git-builder
     apt remove -y git git-man # There is currently a bug with the local git build. This is a workaround line
     dpkg -i git.deb
-    apt install -y gh terraform  # There is currently a bug with the local git build. This is a workaround line
+    apt install -y gh terraform  git-remote-gcrypt # There is currently a bug with the local git build. This is a workaround line
     rm git.deb
 }
 
@@ -270,6 +270,25 @@ build_and_install_stow() {
     docker image rm stow-builder
     sudo dpkg -i stow.deb
     rm stow.deb
+}
+
+install_nvm() {
+    if type nvm >/dev/null 2>&1; then
+        return
+    fi
+
+    curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh" | bash
+
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
+    local latest_node_version_number
+    set +euxo pipefail
+    latest_node_version_number="$(nvm ls-remote | tail -1 | sed 's/^[[:space:]]*v//' | awk '{$1=$1; print}')"
+    echo "latest_node_version_number: ${latest_node_version_number}"
+    nvm install "${latest_node_version_number}" --latest-npm
+    set -euxo pipefail
+    npm config set fund false --location=global
+    # npm install -g @nestjs/cli jest vercel prettier
 }
 
 # Missing:
@@ -387,35 +406,16 @@ install_as_root() {
     chsh -s /bin/zsh "${SUDO_USER}" # if user is not root, this command requires authentication
 }
 
-install_as_user() {
+download_dotfiles() {
     local dotfiles_repo
     local dotfiles_key_file
-    local ZINIT_HOME
-    ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git" # has to be the same as in your .zshrc file
+
     dotfiles_repo="${1:-"https://github.com/Hegi/dotfiles-public.git"}"
-    dotfiles_key_file="${2:-""}"
-    install_zoxide
-
-    # Note: make nodejs installation optional. Opt in/out?
-    if ! type nvm >/dev/null 2>&1; then
-        curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh" | bash
-
-        export NVM_DIR="$HOME/.nvm"
-        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
-        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
-        local latest_node_version_number
-        set +euxo pipefail
-        latest_node_version_number="$(nvm ls-remote | tail -1 | sed 's/^[[:space:]]*v//' | awk '{$1=$1; print}')"
-        echo "latest_node_version_number: ${latest_node_version_number}"
-        nvm install "${latest_node_version_number}" --latest-npm
-        set -euxo pipefail
-        npm config set fund false --location=global
-        # npm install -g @nestjs/cli jest vercel prettier
-    fi
+    dotfiles_key_file="$(realpath ${2:-""})"
 
     if [[ -n "${dotfiles_key_file}" ]]; then
-        if [[ "${dotfiles_repo}" != "gcrypt:"* ]]; then
-            dotfiles_repo="gcrypt:${dotfiles_repo}"
+        if [[ "${dotfiles_repo}" != "gcrypt::"* ]]; then
+            dotfiles_repo="gcrypt::${dotfiles_repo}"
         fi
         gpg --import-options restore --import "${dotfiles_key_file}"
     fi
@@ -424,18 +424,33 @@ install_as_user() {
     git clone "${dotfiles_repo}" dotfiles
     cd dotfiles
     if [[ -n "${dotfiles_key_file}" ]]; then
-        git config remote.origin.gcrypt-participants "${gpg_key_id}" # "$(git config user.signingkey)"
         local gpg_key_id
         gpg_key_id="$(gpg --show-keys "${dotfiles_key_file}" | grep -E '^[[:space:]]+[0-9A-F]{4}' | tr -d ' ')"
+        git config remote.origin.gcrypt-participants "${gpg_key_id}" # "$(git config user.signingkey)"
         git config user.signingkey "${gpg_key_id}"
     fi
     stow .
+}
 
-    if is_not_wsl && is_gui_present; then
-        install_fonts
+download_zinit() {
+    local ZINIT_HOME
+    ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git" # has to be the same as in your .zshrc file
+    if [[ -d "${ZINIT_HOME}" ]]; then
+        return
     fi
 
     mkdir -p "$(dirname $ZINIT_HOME)"
     git clone --depth 1 "https://github.com/zdharma-continuum/zinit.git" "$ZINIT_HOME"
+}
 
+install_as_user() {
+
+    install_zoxide
+    install_nvm
+    download_dotfiles "${1}" "${2}"
+    download_zinit
+
+    if is_not_wsl && is_gui_present; then
+        install_fonts
+    fi
 }
