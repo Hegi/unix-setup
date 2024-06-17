@@ -254,6 +254,10 @@ install_ripgrep() {
     get_artifact_from_github "BurntSushi/ripgrep" "ripgrep_14.1.0-1_amd64.deb"
 }
 
+install_pnpm() {
+    curl -fsSL https://get.pnpm.io/install.sh | sh -
+}
+
 build_and_install_git() {
     docker build -t git-builder -f ./utils/git.dockerfile .
     docker run --rm -v $(pwd):/output git-builder
@@ -292,9 +296,8 @@ install_nvm() {
 }
 
 # Missing:
-# https://github.com/basecamp/omakub/blob/master/install/app-neovim.sh - ??
-# sudo install: flameshot, neovim, btop, ripgrep, gitsign, spotify
-# sudo optional: lazygit, lazydocker, redis-tools mariadb-client build-essential
+# sudo install: neovim,
+# sudo optional: lazygit, lazydocker
 install_as_root() {
     local -a apps_to_install=()
     local -a apps_to_remove=()
@@ -310,7 +313,7 @@ install_as_root() {
         apt install -y curl wget gnupg2 ca-certificates unzip tar xz-utils procps
     fi
 
-    apps_to_install+=("zsh" "zip" "stow")
+    apps_to_install+=("zsh" "zip" "stow" "btop")
 
     prepare_apt_key "httpie" "https://packages.httpie.io/deb/KEY.gpg" "https://packages.httpie.io/deb ./" true "${arch}"
     apps_to_install+=("httpie")
@@ -355,6 +358,10 @@ install_as_root() {
             true "${arch}"
         apps_to_install+=("signal-desktop")
 
+        prepare_apt_key "spotify" "https://download.spotify.com/debian/pubkey_6224F9941A8AA6D1.gpg" \
+        "http://repository.spotify.com stable non-free" true true
+        apps_to_install+=("spotify-client")
+
         if [[ "${distro}" == "ubuntu" ]]; then
             add-apt-repository universe -y
             add-apt-repository ppa:agornostal/ulauncher -y
@@ -365,7 +372,7 @@ install_as_root() {
         fi
         apps_to_install+=("ulauncher")
 
-        apps_to_install+=("vlc")
+        apps_to_install+=("vlc" "flameshot")
 
         install_zoom
         install_vscode

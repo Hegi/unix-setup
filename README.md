@@ -150,6 +150,7 @@ These tools are extensively used by the script itself.
 - **`tar`**: A utility for archiving files and extracting archives.
 - **`xz-utils`**: A set of tools for compressing and decompressing `.xz` files.
 - **`procps`**: A package containing utilities for monitoring system processes.
+- **`btop`**:
 
 ### Console productivity tools
 
@@ -167,7 +168,7 @@ These apps are used to enhance the user-experience of the shell user:
 - **`stow`**: A symlink manager to manage configuration files in a clean and efficient way.
 - **`gum`**: A tool to make shell scripts user-friendly with beautiful interactive prompts.
 - **`neovim`**: A hyperextensible text editor based on Vim, designed to be more extensible and maintainable.
-  - **`nvchad`**: A Neovim configuration that focuses on modern features and a streamlined setup.
+  - **`lazyvim`**: A Neovim configuration that focuses on modern features and a streamlined setup.
 
 ### Developer tools
 
@@ -192,5 +193,7 @@ These apps are only installed if a GUI is present in the distro. (WSL is conside
 - **`docker`**: A platform for developing, shipping, and running applications in containers.
 - **`brave-browser`**: A privacy-focused web browser with built-in ad and tracker blocking.
 - **`signal-desktop`**: A desktop client for the Signal messaging service, which focuses on privacy and security.
+- **`spotfy`**: An app for listening to musc
+- **`flameshot`**: A better way to create screenshots
 - **`ulauncher`**: A fast application launcher for Linux with extension support.
 - **`vlc`**: A free and open-source cross-platform multimedia player and framework that plays most multimedia files and streaming protocols.
