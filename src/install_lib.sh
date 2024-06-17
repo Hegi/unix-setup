@@ -258,6 +258,12 @@ install_pnpm() {
     curl -fsSL https://get.pnpm.io/install.sh | sh -
 }
 
+install_lazygit() {
+    local LAZYGIT_VERSION
+    LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
+    get_artifact_from_github "jesseduffield/lazygit" "lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
+}
+
 build_and_install_git() {
     docker build -t git-builder -f ./utils/git.dockerfile .
     docker run --rm -v $(pwd):/output git-builder
@@ -295,9 +301,11 @@ install_nvm() {
     # npm install -g @nestjs/cli jest vercel prettier
 }
 
-# Missing:
-# sudo install: neovim,
-# sudo optional: lazygit, lazydocker
+install_neovim() {
+    get_artifact_from_github "neovim/neovim" "nvim-linux64.deb"
+
+}
+
 install_as_root() {
     local -a apps_to_install=()
     local -a apps_to_remove=()
@@ -407,8 +415,10 @@ install_as_root() {
     if [[ "${distro}" != "ubuntu" ]]; then
         build_and_install_git
     fi
-    # build_and_install_stow # latest stow build is fragile. Using default one instead.
+    install_lazygit
+    install_neovim
 
+    # build_and_install_stow # latest stow build is fragile. Using default one instead.
 
     chsh -s /bin/zsh "${SUDO_USER}" # if user is not root, this command requires authentication
 }
@@ -454,6 +464,7 @@ install_as_user() {
 
     install_zoxide
     install_nvm
+    install_pnpm
     download_dotfiles "${1}" "${2}"
     download_zinit
 

@@ -37,8 +37,11 @@ test_installed_apps() {
     shellcheck --version > /dev/null
     zoxide --version > /dev/null
     rgrep --version > /dev/null
+    btop --version > /dev/null
     type zinit
     nvm --version > /dev/null
+    pnpm --version > /dev/null
+
 }
 
 test_installed_apps
