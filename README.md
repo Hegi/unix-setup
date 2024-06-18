@@ -197,3 +197,4 @@ These apps are only installed if a GUI is present in the distro. (WSL is conside
 - **`flameshot`**: A better way to create screenshots
 - **`ulauncher`**: A fast application launcher for Linux with extension support.
 - **`vlc`**: A free and open-source cross-platform multimedia player and framework that plays most multimedia files and streaming protocols.
+-

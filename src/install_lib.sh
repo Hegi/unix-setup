@@ -302,7 +302,7 @@ install_nvm() {
 }
 
 install_neovim() {
-    get_artifact_from_github "neovim/neovim" "nvim-linux64.deb"
+    get_artifact_from_github "neovim/neovim-releases" "nvim-linux64.deb" "neovim"
 
 }
 
@@ -316,9 +316,9 @@ install_as_root() {
 
     mkdir -p -m 755 /etc/apt/keyrings
     if [[ "${distro}" == "ubuntu" ]]; then
-        apt install -y zip procps gnupg2
+        apt install -y zip procps
     else
-        apt install -y curl wget gnupg2 ca-certificates unzip tar xz-utils procps
+        apt install -y curl wget ca-certificates unzip tar xz-utils procps
     fi
 
     apps_to_install+=("zsh" "zip" "stow" "btop")
@@ -371,8 +371,8 @@ install_as_root() {
         apps_to_install+=("spotify-client")
 
         if [[ "${distro}" == "ubuntu" ]]; then
-            add-apt-repository universe -y
-            add-apt-repository ppa:agornostal/ulauncher -y
+            add-apt-repository -y universe
+            add-apt-repository -y ppa:agornostal/ulauncher
         else
             prepare_apt_key "ulauncher" \
                 "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xFAF1020699503176" \
@@ -395,7 +395,7 @@ install_as_root() {
     apps_to_install+=("stow") # latest stow build is fragile. Using default one instead.
 
     if [[ "${distro}" == "ubuntu" ]]; then
-        add-apt-repository ppa:git-core/ppa
+        add-apt-repository -y ppa:git-core/ppa
         apt update
     fi
     apt update && apt upgrade -y
@@ -408,7 +408,6 @@ install_as_root() {
     install_yq
     install_fzf
     install_aws_cli
-    install_bat
     install_zellij
     install_shellcheck
     install_ripgrep
@@ -417,6 +416,7 @@ install_as_root() {
     fi
     install_lazygit
     install_neovim
+    install_bat
 
     # build_and_install_stow # latest stow build is fragile. Using default one instead.
 

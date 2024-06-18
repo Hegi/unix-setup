@@ -1,12 +1,7 @@
 #!/bin/zsh
 
-if [[ -n "${ZSH_VERSION:-""}" ]]; then
-    setopt pipefail
-elif [[ -n "${BASH_VERSION:-""}" ]]; then
-    set -o pipefail
-fi
-
-set -eux
+. ~/.zshrc
+set -e
 
 test_installed_apps() {
     zip --version > /dev/null
@@ -38,10 +33,9 @@ test_installed_apps() {
     zoxide --version > /dev/null
     rgrep --version > /dev/null
     btop --version > /dev/null
-    type zinit
-    nvm --version > /dev/null
     pnpm --version > /dev/null
-
+    nvm --version > /dev/null
+    type zinit > /dev/null
 }
 
 test_installed_apps
