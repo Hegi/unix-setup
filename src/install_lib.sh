@@ -428,7 +428,7 @@ download_dotfiles() {
     local dotfiles_key_file
 
     dotfiles_repo="${1:-"https://github.com/Hegi/dotfiles-public.git"}"
-    dotfiles_key_file="$(realpath ${2:-""})"
+    dotfiles_key_file="${2:+$(realpath "$2")}"
 
     if [[ -n "${dotfiles_key_file}" ]]; then
         if [[ "${dotfiles_repo}" != "gcrypt::"* ]]; then
@@ -465,7 +465,7 @@ install_as_user() {
     install_zoxide
     install_nvm
     install_pnpm
-    download_dotfiles "${1}" "${2}"
+    download_dotfiles "${1:-""}" "${2:-""}"
     download_zinit
 
     if is_not_wsl && is_gui_present; then
