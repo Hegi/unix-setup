@@ -359,7 +359,7 @@ install_as_root() {
         prepare_apt_key "brave-browser" \
             "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg" \
             "https://brave-browser-apt-release.s3.brave.com/ stable main"
-        apps_to_install+=("brave-brwoser")
+        apps_to_install+=("brave-browser")
 
         prepare_apt_key "signal-desktop" \
             "https://updates.signal.org/desktop/apt/keys.asc" "https://updates.signal.org/desktop/apt xenial main" \
@@ -465,8 +465,8 @@ install_as_user() {
     install_zoxide
     install_nvm
     install_pnpm
-    download_dotfiles "${1:-""}" "${2:-""}"
     download_zinit
+    download_dotfiles "${1:-""}" "${2:-""}"
 
     if is_not_wsl && is_gui_present; then
         install_fonts
