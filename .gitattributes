@@ -1,0 +1,8 @@
+*.exe binary
+*.sh text eol=lf
+utils/scripts/gpg-agent-relay text eol=lf
+
+utils/windows/wsl-ssh-pageant/* binary
+utils/windows/npiperelay/* binary
+utils/windows/terminal/settings.json text eol=crlf
+utils/windows/gnupg/*.conf text eol=crlf

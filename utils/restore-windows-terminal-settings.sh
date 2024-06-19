@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/usr/bin/zsh
 
 if [[ -n "${ZSH_VERSION:-""}" ]]; then
     setopt pipefail

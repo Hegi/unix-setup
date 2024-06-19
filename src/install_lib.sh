@@ -321,7 +321,7 @@ install_as_root() {
         apt install -y curl wget ca-certificates unzip tar xz-utils procps
     fi
 
-    apps_to_install+=("zsh" "zip" "stow" "btop")
+    apps_to_install+=("zsh" "zip" "stow" "btop" "socat") # latest stow build is fragile. Using default one instead.
 
     prepare_apt_key "httpie" "https://packages.httpie.io/deb/KEY.gpg" "https://packages.httpie.io/deb ./" true "${arch}"
     apps_to_install+=("httpie")
@@ -391,8 +391,6 @@ install_as_root() {
     else
         echo "No need to install GUI applications and packages"
     fi
-
-    apps_to_install+=("stow") # latest stow build is fragile. Using default one instead.
 
     if [[ "${distro}" == "ubuntu" ]]; then
         add-apt-repository -y ppa:git-core/ppa

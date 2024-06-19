@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/usr/bin/zsh
 
 if [[ -n "${ZSH_VERSION:-""}" ]]; then
     setopt pipefail
@@ -10,6 +10,6 @@ set -eux
 
 terminalAppFolder="$(find "$(wslpath "$(powershell.exe '$env:LOCALAPPDATA')" | tr -d '\r')/Packages" -maxdepth 1 -type d -name "Microsoft.WindowsTerminal_*")"
 
-mkdir -p "utils/windows-terminal"
-cp "${terminalAppFolder}/LocalState/settings.json" "utils/windows-terminal/settings.json"
-chmod -x "utils/windows-terminal/settings.json"
+mkdir -p "utils/windows/terminal"
+cp "${terminalAppFolder}/LocalState/settings.json" "utils/windows/terminal/settings.json"
+chmod -x "utils/windows/terminal/settings.json"
