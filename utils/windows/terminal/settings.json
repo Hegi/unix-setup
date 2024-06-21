@@ -1,7 +1,7 @@
 {
     "$help": "https://aka.ms/terminal-documentation",
     "$schema": "https://aka.ms/terminal-profiles-schema",
-    "actions":
+    "actions": 
     [
         {
             "command": "unbound",
@@ -12,7 +12,7 @@
             "keys": "ctrl+v"
         },
         {
-            "command":
+            "command": 
             {
                 "action": "splitPane",
                 "split": "auto",
@@ -35,24 +35,24 @@
     "initialRows": 45,
     "language": "en-US",
     "multiLinePasteWarning": false,
-    "newTabMenu":
+    "newTabMenu": 
     [
         {
             "type": "remainingProfiles"
         }
     ],
-    "profiles":
+    "profiles": 
     {
-        "defaults":
+        "defaults": 
         {
             "colorScheme": "Catppuccin Mocha",
-            "font":
+            "font": 
             {
                 "face": "SauceCodePro Nerd Font",
                 "size": 11.0
             }
         },
-        "list":
+        "list": 
         [
             {
                 "backgroundImage": "C:\\Users\\hegi\\OneDrive\\Pictures\\Ubuntu-Logo-Small.png",
@@ -138,7 +138,7 @@
             }
         ]
     },
-    "schemes":
+    "schemes": 
     [
         {
             "background": "#0C0C0C",
@@ -417,23 +417,23 @@
             "yellow": "#808000"
         }
     ],
-    "themes":
+    "themes": 
     [
         {
             "name": "Catppuccin Mocha",
-            "tab":
+            "tab": 
             {
                 "background": "#1E1E2EFF",
                 "iconStyle": "default",
                 "showCloseButton": "always",
                 "unfocusedBackground": null
             },
-            "tabRow":
+            "tabRow": 
             {
                 "background": "#181825FF",
                 "unfocusedBackground": "#11111BFF"
             },
-            "window":
+            "window": 
             {
                 "applicationTheme": "dark",
                 "experimental.rainbowFrame": false,
