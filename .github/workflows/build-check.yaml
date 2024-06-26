@@ -1,5 +1,4 @@
-name: learn-github-actions
-run-name: ${{ github.actor }} is learning GitHub Actions
+name: Install script integrity check
 on:
   push:
     branches: [master]
@@ -16,8 +15,22 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build Ubuntu
+        run: docker build . --file ./tests/ubuntu.dockerfile --tag "heguntu:$(date +%Y%m%d)"
+
+      - name: Test installed apps
+        run: docker run --rm -v $(pwd):/unix-setup -v /var/run/docker.sock:/var/run/docker.sock heguntu ./tests/check-installed-apps.sh
+        timeout-minutes: 2
+
+  debian-tests:
+    name: Debian tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Build Ubuntu
         run: docker build . --file ./tests/debian.dockerfile --tag "hegian:$(date +%Y%m%d)"
 
       - name: Test installed apps
-        run: docker run --rm -it -v $(pwd):/unix-setup -v /var/run/docker.sock:/var/run/docker.sock hegian ./tests/check-installed-apps.sh
-        timeout-minutes: 10
+        run: docker run --rm -v $(pwd):/unix-setup -v /var/run/docker.sock:/var/run/docker.sock hegian ./tests/check-installed-apps.sh
+        timeout-minutes: 2
