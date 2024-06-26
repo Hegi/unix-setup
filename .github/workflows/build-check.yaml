@@ -19,11 +19,11 @@ jobs:
 
       - name: Install apps
         run: |
-          docker run --name heguntu001 -a stdout -a stderr -v $(pwd):/unix-setup -v /var/run/docker.sock:/var/run/docker.sock heguntu
-          docker exec heguntu001 /bin/bash -c "sudo install.sh"
+          docker run --name heguntu001 -d -v $(pwd):/unix-setup -v /var/run/docker.sock:/var/run/docker.sock heguntu
+          docker exec -a stdout -a stderr heguntu001 /bin/bash -c "sudo install.sh"
 
       - name: Test installed apps
-        run: docker exec heguntu001 /usr/bin/zsh -c "source ~/.zshrc && tests/check-installed-apps.sh"
+        run: docker exec -a stdout -a stderr heguntu001 /usr/bin/zsh -c "source ~/.zshrc && tests/check-installed-apps.sh"
         timeout-minutes: 2
 
   debian-tests:
@@ -38,9 +38,9 @@ jobs:
 
       - name: Test installed apps
         run: |
-          docker run --name hegian001 -a stdout -a stderr -v $(pwd):/unix-setup -v /var/run/docker.sock:/var/run/docker.sock hegian
-          docker exec hegian001 /bin/bash -c "sudo install.sh"
+          docker run --name hegian001 -d -v $(pwd):/unix-setup -v /var/run/docker.sock:/var/run/docker.sock hegian
+          docker exec -a stdout -a stderr hegian001 /bin/bash -c "sudo install.sh"
 
       - name: Test installed apps
-        run: docker exec hegian001 /usr/bin/zsh -c "source ~/.zshrc && tests/check-installed-apps.sh"
+        run: docker exec -a stdout -a stderr hegian001 /usr/bin/zsh -c "source ~/.zshrc && tests/check-installed-apps.sh"
         timeout-minutes: 2
