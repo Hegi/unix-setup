@@ -1,0 +1,23 @@
+name: learn-github-actions
+run-name: ${{ github.actor }} is learning GitHub Actions
+on:
+  push:
+    branches: [master]
+  schedule:
+    - cron: 0 18 * * 1
+  workflow_dispatch:
+
+jobs:
+  ubuntu-tests:
+    name: Ubuntu tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Build Ubuntu
+        run: docker build . --file ./tests/debian.dockerfile --tag "hegian:$(date +%Y%m%d)"
+
+      - name: Test installed apps
+        run: docker run --rm -it -v $(pwd):/unix-setup -v /var/run/docker.sock:/var/run/docker.sock hegian ./tests/check-installed-apps.sh
+        timeout-minutes: 10
