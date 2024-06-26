@@ -15,9 +15,9 @@ USER hegi
 
 WORKDIR /unix-setup
 
-# RUN sudo ./install.sh
+RUN sudo ./install.sh
 
-ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["/usr/bin/zsh"]
 
 # docker build -t hegian -f ./tests/debian.dockerfile .
 # docker run --rm -it -v $(pwd):$(pwd) -v /var/run/docker.sock:/var/run/docker.sock hegian

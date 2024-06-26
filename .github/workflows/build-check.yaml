@@ -28,7 +28,7 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Build Ubuntu
+      - name: Build Debian
         run: docker build . --file ./tests/debian.dockerfile --tag "hegian"
 
       - name: Test installed apps
