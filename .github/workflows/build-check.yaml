@@ -18,7 +18,10 @@ jobs:
         run: docker build . --file ./tests/ubuntu.dockerfile --tag "heguntu"
 
       - name: Test installed apps
-        run: docker run --rm -v $(pwd):/unix-setup -v /var/run/docker.sock:/var/run/docker.sock heguntu ./tests/check-installed-apps.sh
+        run: |
+          docker run --name heguntu001 -v $(pwd):/unix-setup -v /var/run/docker.sock:/var/run/docker.sock heguntu
+          docker exec heguntu001 /bin/bash -c "sudo install.sh"
+          docker exec heguntu001 /usr/bin/zsh -c "source ~/.zshrc && tests/check-installed-apps.sh"
         timeout-minutes: 2
 
   debian-tests:
@@ -32,5 +35,9 @@ jobs:
         run: docker build . --file ./tests/debian.dockerfile --tag "hegian"
 
       - name: Test installed apps
-        run: docker run --rm -v $(pwd):/unix-setup -v /var/run/docker.sock:/var/run/docker.sock hegian ./tests/check-installed-apps.sh
+        run: |
+          docker run --name hegian001 -v $(pwd):/unix-setup -v /var/run/docker.sock:/var/run/docker.sock hegian
+          docker exec hegian001 /bin/bash -c "sudo install.sh"
+          docker exec hegian001 /usr/bin/zsh -c "source ~/.zshrc && tests/check-installed-apps.sh"
+
         timeout-minutes: 2

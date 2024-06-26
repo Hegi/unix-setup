@@ -15,11 +15,7 @@ USER hegi
 
 WORKDIR /unix-setup
 
-COPY . .
-
-RUN sudo ./install.sh
-
-ENTRYPOINT ["/usr/bin/zsh"]
+CMD ["tail", "-f", "/dev/null"]
 
 # docker build -t heguntu -f ./tests/debian.dockerfile .
 # docker run --rm -it -v $(pwd):$(pwd) -v /var/run/docker.sock:/var/run/docker.sock heguntu
