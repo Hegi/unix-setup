@@ -15,6 +15,8 @@ USER hegi
 
 WORKDIR /unix-setup
 
+COPY . .
+
 RUN sudo ./install.sh
 
 ENTRYPOINT ["/usr/bin/zsh"]
