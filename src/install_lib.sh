@@ -172,7 +172,7 @@ install_jq() {
 
 install_bat() {
     # Naming is bad here, never version will break, needs to be more dynamic.
-    get_artifact_from_github "sharkdp/bat" "bat-musl_0.24.0_amd64.deb"
+    get_artifact_from_github "sharkdp/bat" "bat_0.26.0_amd64.deb"
 }
 
 install_powershell() {
@@ -182,7 +182,7 @@ install_powershell() {
 
 install_fzf() {
     # Naming is bad here, never version will break, needs to be more dynamic.
-    get_artifact_from_github "junegunn/fzf" "fzf-0.53.0-linux_amd64.tar.gz"
+    get_artifact_from_github "junegunn/fzf" "fzf-0.66.0-linux_amd64.tar.gz"
 }
 
 install_aws_cli() {
@@ -247,11 +247,11 @@ install_zellij() {
 }
 
 install_shellcheck() {
-    get_artifact_from_github "koalaman/shellcheck" "shellcheck-v0.10.0.linux.x86_64.tar.xz"
+    get_artifact_from_github "koalaman/shellcheck" "shellcheck-v0.11.0.linux.x86_64.tar.xz"
 }
 
 install_ripgrep() {
-    get_artifact_from_github "BurntSushi/ripgrep" "ripgrep_14.1.0-1_amd64.deb"
+    get_artifact_from_github "BurntSushi/ripgrep" "ripgrep_15.0.0-1_amd64.deb"
 }
 
 install_pnpm() {
@@ -287,7 +287,7 @@ install_nvm() {
         return
     fi
 
-    curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh" | bash
+    curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh" | bash
 
     export NVM_DIR="$HOME/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
@@ -302,7 +302,7 @@ install_nvm() {
 }
 
 install_neovim() {
-    get_artifact_from_github "neovim/neovim-releases" "nvim-linux64.deb" "neovim"
+    get_artifact_from_github "neovim/neovim-releases" "nvim-linux-x86_64.deb" "neovim"
 
 }
 
@@ -321,7 +321,7 @@ install_as_root() {
         apt install -y curl wget ca-certificates unzip tar xz-utils procps
     fi
 
-    apps_to_install+=("zsh" "zip" "stow" "btop" "socat") # latest stow build is fragile. Using default one instead.
+    apps_to_install+=("zsh" "zip" "stow" "btop" "socat" "libatomic1") # latest stow build is fragile. Using default one instead.
 
     prepare_apt_key "httpie" "https://packages.httpie.io/deb/KEY.gpg" "https://packages.httpie.io/deb ./" true "${arch}"
     apps_to_install+=("httpie")
@@ -405,7 +405,7 @@ install_as_root() {
     install_jq
     install_yq
     install_fzf
-    install_aws_cli
+    # install_aws_cli
     install_zellij
     install_shellcheck
     install_ripgrep
@@ -462,9 +462,9 @@ install_as_user() {
 
     install_zoxide
     install_nvm
-    install_pnpm
+    #install_pnpm
     download_zinit
-    download_dotfiles "${1:-""}" "${2:-""}"
+    #download_dotfiles "${1:-""}" "${2:-""}"
 
     if is_not_wsl && is_gui_present; then
         install_fonts

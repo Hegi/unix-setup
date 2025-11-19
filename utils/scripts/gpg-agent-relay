@@ -11,8 +11,8 @@
 # Place this script in WSL at ~/.local/bin/gpg-agent-relay
 # Start it on login by calling it from your .bashrc: "$HOME/.local/bin/gpg-agent-relay start"
 
-# GNUPGHOME="$HOME/.gnupg"
-GNUPGHOME="$(dirname "$(gpgconf --list-dirs agent-socket)")"
+# set -euxo pipefail # Uncomment for debugging
+GNUPGHOME="$HOME/.gnupg"
 PIDFILE="$GNUPGHOME/gpg-agent-relay.pid"
 
 die() {
@@ -25,7 +25,7 @@ main() {
   checkdeps
   case $1 in
   start)
-    if ! start-stop-daemon --pidfile "$PIDFILE" --background --notify-await --notify-timeout 5 --make-pidfile --exec "$0" --start -- foreground; then
+    if ! start-stop-daemon --pidfile "$PIDFILE" --background --notify-await --notify-timeout 5 --make-pidfile --exec "$(realpath $0)" --start -- foreground; then
       die 'Failed to start. Run `gpg-agent-relay foreground` to see output.'
     fi
     ;;
@@ -53,13 +53,17 @@ relay() {
   local winuser
   winuser=$(/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe '$env:UserName')
   winuser=${winuser//$'\r'}
+
   local winhome="/mnt/c/Users/$winuser"
   local wingnupghome="C:/Users/$winuser/AppData/Local/gnupg"
   local npiperelay="$winhome/AppData/Roaming/npiperelay/npiperelay.exe"
   local wslsshpageant="$winhome/AppData/Roaming/wsl-ssh-pageant/wsl-ssh-pageant-amd64-gui.exe"
   local gpgconnectagent="/mnt/c/Programs/GnuPG/bin/gpg-connect-agent.exe"
-  local gpgagentsocket="$GNUPGHOME/S.gpg-agent"
-  local sshagentsocket="$GNUPGHOME/S.gpg-agent.ssh"
+
+  local gpgagentsocket
+  local sshagentsocket
+  gpgagentsocket=$(gpgconf --list-dirs agent-socket 2>/dev/null || echo "$GNUPGHOME/S.gpg-agent")
+  sshagentsocket=$(gpgconf --list-dirs agent-ssh-socket 2>/dev/null || echo "$GNUPGHOME/S.gpg-agent.ssh")
 
   killsocket "$gpgagentsocket"
   killsocket "$sshagentsocket"
